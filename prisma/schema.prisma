@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model registro {
+model registros {
   id       String @id
   username     String
   email    String 
