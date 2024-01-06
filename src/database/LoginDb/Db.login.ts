@@ -1,4 +1,3 @@
-import { Pool, QueryResult } from 'pg';
 
 import { sql } from '../db';
 
