@@ -1,7 +1,7 @@
 
 import { Response } from 'express';
 import jwt from 'jsonwebtoken';
-import authconfig from '../config/auth.config'; // Certifique-se de importar seu arquivo de configuração de autenticação
+import authconfig from '../config/auth.config'; 
 import { ValidarEmail } from '../database/LoginDb/Db.login';
 
 
@@ -18,7 +18,6 @@ export default class AuthController {
             throw error;
         }
     }
-
     public async post(req: any, res: Response): Promise<void> {
         try {
             const { email, password } = req.body.userData;
@@ -28,17 +27,13 @@ export default class AuthController {
             const emailExists = await validarEmail.verificarExistenciaEmail(email, password);
     
             if (emailExists) {
-                const isAdmin: boolean = email === 'admin@gmail.com' && password === '010203';
-    
+                const isAdmin: boolean = email === 'admin@gmail.com' && password === '010203'; 
                 const tokenData = {
                     id: 101,
                     isAdmin: isAdmin
                 };
-    
-                const expiresIn = isAdmin ? '1h' : '24h';
-    
-                const generatedToken = jwt.sign(tokenData, authconfig.JWT_KEY, { expiresIn });
-    
+                const expiresIn = isAdmin ? '1h' : '24h';   
+                const generatedToken = jwt.sign(tokenData, authconfig.JWT_KEY, { expiresIn });   
                 res.json({
                     success: true,
                     token: generatedToken,
