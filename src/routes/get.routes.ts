@@ -6,4 +6,5 @@ const usercontroller = new Usercontroller()
 
 get.get('/user', usercontroller.get)
 
+
 export default get
