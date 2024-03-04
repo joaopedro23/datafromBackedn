@@ -4,3 +4,4 @@ const authconfig: { JWT_KEY: string } = {
   
   export default authconfig;
   
+  // coloca como env. secret_key

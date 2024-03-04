@@ -18,7 +18,7 @@ interface Registro {
   password: string;
 }
 
-const registros: Registro[] = [];
+
 
 export default class RegistroController {
 public async post(req: Request, res: Response): Promise <void> {
@@ -31,7 +31,9 @@ public async post(req: Request, res: Response): Promise <void> {
     }
 
     const { username, email, password } = userData;
+    // verifca usuario existente
 
+// verifca usuario existente
     const id: string = generateUUID(); 
 
     const novoRegistro: Registro = {
@@ -58,9 +60,4 @@ public async post(req: Request, res: Response): Promise <void> {
       }
 } 
  // Adiciona o novo usuário na lista de usuários
-
-public get(req: Request, res: Response): void {
-  console.log(registros);
-    res.json(registros); 
-} 
 }

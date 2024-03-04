@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropbox File Browser</title>
+    <style>
+        /* Estilos simples para a lista de arquivos */
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        .folder {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dropbox File Browser</h1>
+    <ul id="fileList">
+        <!-- A lista de arquivos será renderizada aqui -->
+    </ul>
+
+    <script>
+        // Função para buscar e exibir os dados do Dropbox
+        async function exibirDadosDoDropbox() {
+            try {
+                const response = await fetch('http://localhost:3000/fetch-dropbox-files');
+                const data = await response.json();
+
+                const fileList = document.getElementById('fileList');
+
+                // Limpa a lista antes de adicionar os novos itens
+                fileList.innerHTML = '';
+
+                data.forEach(entry => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = entry.nome;
+
+                    // Adiciona uma classe 'folder' se for uma pasta
+                    if (entry.tipo === 'folder') {
+                        listItem.classList.add('folder');
+                    }
+
+                    fileList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('Erro ao buscar dados do Dropbox:', error);
+            }
+        }
+
+        // Chama a função para exibir os dados ao carregar a página
+        window.onload = exibirDadosDoDropbox;
+    </script>
+</body>
+</html>
