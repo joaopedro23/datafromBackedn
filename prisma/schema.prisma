@@ -17,3 +17,8 @@ model registros {
   password String
 
 }
+
+model Token {
+  id           Int      @id @default(autoincrement())
+  accessToken  String
+}

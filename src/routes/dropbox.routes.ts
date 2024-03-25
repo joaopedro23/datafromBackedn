@@ -3,7 +3,9 @@
 import { Router } from 'express';
 import DropboxService from '../services/dropbox/dropbox.service';
 import DropboxController from '../controllers/DropBoxControllers/dropBox.contollees';
+import { configDotenv } from 'dotenv';
 
+// coloca todas essas varaveis em env//
 
 const router = Router();
 const clientId = 'w0um6maunawdgio';

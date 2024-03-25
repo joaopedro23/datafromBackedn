@@ -1,36 +1,58 @@
 import { Dropbox } from 'dropbox';
 
-// Configure o token de acesso à API do Dropbox e coloca em arquivo env
-const dbx = new Dropbox({ accessToken: 'sl.BwVHax452_rMDCMezc_7qXWJcFzVby5RFC3KrSXJHcGB9uCyNgNtdfE4mjoR_4REdW6fgZMPpTJiD7nCZCFWS8jmrfQFm6z7zdn5tlivNM_PQtaRo0_5KK5BpWUhL4QoYrookbDMonjy' });
+import { PrismaClient } from '@prisma/client';
 
-// Interface para representar os metadados de um arquivo ou pasta
-interface DropboxEntry {
+const prisma = new PrismaClient();
+
+export interface DropboxEntry {
     nome: string;
     tipo: string; // 'file' para arquivo, 'folder' para pasta
     caminho: string;
 }
+let dbx = new Dropbox({ accessToken: '' });
 
-// Função para obter os dados do Dropbox
-export async function obterDadosDoDropbox(): Promise<DropboxEntry[]> {
+export async function obterDadosDoDropbox(): Promise<DropboxEntry[] | undefined> {
     try {
-        // Lista
-        const response = await dbx.filesListFolder({ path: '/Pf' });
+        // Obtém o token do banco de dados
+        const token = await getTokenFromDatabase();
 
-        // Mapea os metadados dos arquivos para um objeto
-        const dados: DropboxEntry[] = response.result.entries.map((entry: any) => {
-            return {
-                nome: entry.name,
-                tipo: entry['.tag'], // 'file' para arquivo, 'folder' para pasta
-                caminho: entry.path_lower
-            };
-        });
+        if (token !== undefined) {
+            // Reinicializa o cliente do Dropbox com o token obtido
+            dbx = new Dropbox({ accessToken: token });
 
-        return dados;
+            // Agora você pode usar o cliente do Dropbox (dbx) para fazer chamadas à API do Dropbox com o token atualizado
+            // Por exemplo:
+            const response = await dbx.filesListFolder({ path: '/Pf' });
+            console.log(response.result.entries);
+            const dados: DropboxEntry[] = response.result.entries.map((entry: any) => {
+                return {
+                    id: entry.id,
+                    nome: entry.name,
+                    tipo: entry['.tag'], 
+                    caminho: entry.path_lower
+                };
+            });
+            return dados;
+        } else {
+            console.error('Token de acesso do Dropbox não encontrado.');
+        }
     } catch (error) {
         console.error('Erro ao obter dados do Dropbox:', error);
         throw error;
     }
 }
 
+export async function getTokenFromDatabase(): Promise<string | undefined> {
+    try {
+        const token = await prisma.token.findUnique({
+            where: {
+                id: 1 
+            }
+        });
 
-// pega token do dropbox.service.ts e usar aqui e deixa automatizado//
+        return token?.accessToken; 
+    } catch (error) {
+        console.error('Erro ao buscar token do banco de dados:', error);
+        throw error;
+    }
+}

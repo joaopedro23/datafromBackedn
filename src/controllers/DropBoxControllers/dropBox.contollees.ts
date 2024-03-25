@@ -1,65 +1,27 @@
 // dropbox.controller.ts
 
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import DropboxService from '../../services/dropbox/dropbox.service';
-import puppeteer from 'puppeteer';
+import { PrismaClient } from '@prisma/client';
 
+const prisma = new PrismaClient();
 
 
 class DropboxController {
     private dropboxService: DropboxService;
+    public accessToken: string | null;
 
+    
     constructor(dropboxService: DropboxService) {
         this.dropboxService = dropboxService;
+        this.accessToken = null;
     }
 
     async authRedirect(req: Request, res: Response): Promise<void> {
         
         try {
             const authorizationUrl = await this.dropboxService.getAuthorizationUrl();
-
-            const browser = await puppeteer.launch({ headless: false});
-            const page = await browser.newPage();
-
-            await page.goto(authorizationUrl);
-
-            await page.waitForSelector('.nsm7Bb-HzV7m-LgbsSe-BPrWId');
-            
-
-            // Clica no botão usando a classe específica
-            await page.click('.nsm7Bb-HzV7m-LgbsSe-BPrWId');
-            console.log('botao clicado');
-
-            await page.waitForSelector('input[type="email"]',  { timeout: 5000, visible:true, }).catch(err => {
-                console.error('Erro ao localizar o campo de entrada de email:', err);
-            })
-            console.log('campo email achado'); 
-            
-
-            // Digita seu email no campo de entrada
-            const email:string = 'joaopedro105manairapb@gmail.com'; // Substitua pelo seu email
-            console.log(`Digitando o email: ${email}`);
-
-            await page.type('input[type="email"]', email, { delay: 100 });
-
-            
-
-            await Promise.all([
-                page.waitForSelector('.VfPpkd-vQzf8d'),
-                page.waitForSelector('button[name="allow"]')
-            ]);
-                // Clica no botão "Continuar"
-            await page.click('.VfPpkd-vQzf8d');
-
-            // Espera até que o seletor do botão "Permitir" esteja disponível
-            await page.waitForSelector('button[name="allow"]');
-
-            // Clica no botão "Permitir"
-            await page.click('button[name="allow"]');
-
-            // Fecha o navegador Puppeteer
-            await browser.close();
-
+            res.redirect(authorizationUrl)
             
             console.log('Página de autorização do Dropbox carregada.');
         } catch (error:any) {
@@ -74,18 +36,52 @@ class DropboxController {
             if (!code) {
                 throw new Error('Código de autorização ausente na solicitação.');
             }
-            await this.dropboxService.authorizeAutomatically();// mecher aqui
-
             const accessToken = await this.dropboxService.getAccessToken(code);
-            console.log('Resposta do Dropbox:', accessToken);
-            res.json(accessToken);
+
+            const expiresInMs = parseInt(req.query.expires_in as string) * 1000; // Converte o tempo de expiração de segundos para milissegundos
+
+            // Determine se o token é de curta ou longa duração com base na data de expiração
+            const duracaoToken = expiresInMs < 24 * 60 * 60 * 1000 ? 'curto' : 'longo';
+
+            let savedToken = await prisma.token.findUnique({
+                where: {
+                    id: 1 // Supondo que o token único está armazenado no banco de dados com id 1
+                }
+            });
+            if (savedToken) {
+                // Se um token já existe, atualize-o com o novo accessToken
+                savedToken = await prisma.token.update({
+                    where: {
+                        id: 1
+                    },
+                    data: {
+                        accessToken: accessToken
+                    }
+                });
+            } else {
+                // Se não existe, crie um novo registro no banco de dados
+                savedToken = await prisma.token.create({
+                    data: {
+                        accessToken: accessToken
+                    }
+                });
+            }
+
+            res.json({
+                accessToken: savedToken.accessToken,
+                duracaoToken: duracaoToken 
+        });
         } catch (error:any) {
             console.error('Erro ao autenticar com o Dropbox:', error.message);
             res.status(500).json({ error: 'Erro ao autenticar com o Dropbox' });
         }
+        
+    }
+    AccessToken(): string | null {
+        return this.accessToken;
     }
 
-    async testToken(req: Request, res: Response): Promise<void> {
+public async testToken(req: Request, res: Response): Promise<void> {
         try {
             // Obtém o token armazenado
             const accessToken = this.dropboxService.AccessToken();
@@ -100,10 +96,7 @@ class DropboxController {
             console.error('Erro ao testar o token de acesso:', error);
             res.status(500).json({ error: 'Erro ao testar o token de acesso' });
         }
-    }
-    
-    
-
+    } 
 }
 
 export default DropboxController;
