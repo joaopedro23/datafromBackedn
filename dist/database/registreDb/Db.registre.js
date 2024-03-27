@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obterRegistros = exports.inserirRegistro = exports.TesteClass = void 0;
+exports.VerificarRegistroExistente = exports.obterRegistros = exports.inserirRegistro = void 0;
 const pg_1 = require("pg");
 const dotenv_1 = __importDefault(require("dotenv"));
 const db_1 = require("../db");
@@ -26,20 +26,8 @@ const pool = new pg_1.Pool({
     database: PGDATABASE || '',
     password: PGPASSWORD || '',
     port: 5432,
+    options: `project=${ENDPOINT_ID || ''}`,
 });
-// teste inserir dados //
-class TesteClass {
-    create(video) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const videoId = (0, generateUuis4_core_1.generateUUID)();
-            const { title, description, duration } = video;
-            yield (0, db_1.sql) `insert into videos (id, title, description, duration) 
-        VALUES (${videoId}, ${title}, ${description}, ${duration})`;
-        });
-    }
-}
-exports.TesteClass = TesteClass;
-// teste inserir dados//
 class inserirRegistro {
     creatRegistre(registre) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -53,7 +41,7 @@ class inserirRegistro {
 }
 exports.inserirRegistro = inserirRegistro;
 const obterRegistros = () => {
-    const sql = 'SELECT * FROM sua_tabela';
+    const sql = 'SELECT * FROM registros ';
     return pool.query(sql)
         .then((res) => res.rows)
         .catch((err) => {
@@ -61,3 +49,24 @@ const obterRegistros = () => {
     });
 };
 exports.obterRegistros = obterRegistros;
+// verifica o sslmode=require e adiciona ssl//
+class VerificarRegistroExistente {
+    constructor(pool) {
+        this.pool = pool;
+    }
+    verificarRegistro(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const sql = 'SELECT COUNT(*) AS count FROM registros WHERE email = $1';
+            try {
+                const res = yield this.pool.query(sql, [email]);
+                const rowCount = parseInt(res.rows[0].count);
+                return rowCount > 0;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+}
+exports.VerificarRegistroExistente = VerificarRegistroExistente;
+// verifica o sslmode=require e adiciona ssl//

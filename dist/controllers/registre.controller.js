@@ -16,7 +16,6 @@ const generateUuis4_core_1 = require("../core/uuid4/generateUuis4.core"); // Ver
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const auth_config_1 = __importDefault(require("../config/auth.config"));
 const Db_registre_1 = require("../database/registreDb/Db.registre");
-const registros = [];
 class RegistroController {
     post(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -27,6 +26,8 @@ class RegistroController {
                     return;
                 }
                 const { username, email, password } = userData;
+                // verifca usuario existente
+                // verifca usuario existente
                 const id = (0, generateUuis4_core_1.generateUUID)();
                 const novoRegistro = {
                     id,
@@ -45,11 +46,6 @@ class RegistroController {
                 res.status(500).json({ error: 'Erro ao inserir registro' });
             }
         });
-    }
-    // Adiciona o novo usuário na lista de usuários
-    get(req, res) {
-        console.log(registros);
-        res.json(registros);
     }
 }
 exports.default = RegistroController;

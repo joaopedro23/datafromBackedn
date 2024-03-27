@@ -10,7 +10,7 @@ dotenv_1.default.config();
 let { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
 PGDATABASE = decodeURIComponent(PGDATABASE || '');
 const URL = `postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?option=project=${ENDPOINT_ID}`;
-exports.sql = (0, postgres_1.default)(URL, { ssl: 'require' });
+exports.sql = (0, postgres_1.default)(URL, { ssl: true });
 const DbData = (0, postgres_1.default)({
     host: PGHOST || '',
     database: PGDATABASE || '',

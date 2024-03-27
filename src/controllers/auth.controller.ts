@@ -4,7 +4,6 @@ import authconfig from "../config/auth.config";
 import { ValidarEmail } from "../database/LoginDb/Db.login";
 import { Autenticacao } from "../app/auth/auth.autenticação";
 
-
     export default class AuthController {
     private validarEmail: ValidarEmail;
 
@@ -26,7 +25,7 @@ import { Autenticacao } from "../app/auth/auth.autenticação";
             email,
             password
         );
-
+        
         if (emailExists.success) {
             const isAdmin: boolean =
             email === "admin@gmail.com" && password === "010203";
@@ -112,7 +111,7 @@ import { Autenticacao } from "../app/auth/auth.autenticação";
             });
             return;
         }
-        
+
         const userId = decodedToken.id;
 
         if (req.params.userId && req.params.userId !== userId) {

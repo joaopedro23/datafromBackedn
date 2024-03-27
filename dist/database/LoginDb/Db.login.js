@@ -8,25 +8,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ValidarEmail = void 0;
-const dotenv_1 = __importDefault(require("dotenv"));
 const db_1 = require("../db");
-dotenv_1.default.config();
 class ValidarEmail {
     verificarExistenciaEmail(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const result = yield (0, db_1.sql) `SELECT COUNT(*) AS count FROM registros WHERE email = ${email} AND password = ${password}`;
-                if (result && result[0] && result[0].count !== undefined) {
-                    const rowCount = result[0].count;
-                    return rowCount > 0;
+                const result = yield (0, db_1.sql) `SELECT id, username FROM registros WHERE email = ${email} AND password = ${password}`;
+                if (result && result.length > 0) {
+                    // Retorna o primeiro registro encontrado (pode haver mais de um, mas considerando apenas o primeiro aqui)
+                    const user = result[0];
+                    return {
+                        success: true,
+                        user: {
+                            id: user.id,
+                            username: user.username,
+                            // Adicione outros campos desejados aqui
+                        }
+                    };
                 }
                 else {
-                    return false;
+                    return {
+                        success: false,
+                        message: 'Invalid credentials',
+                    };
                 }
             }
             catch (error) {

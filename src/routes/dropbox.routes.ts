@@ -3,13 +3,16 @@
 import { Router } from 'express';
 import DropboxService from '../services/dropbox/dropbox.service';
 import DropboxController from '../controllers/DropBoxControllers/dropBox.contollees';
-import { configDotenv } from 'dotenv';
+import dotenv from 'dotenv';
 
 // coloca todas essas varaveis em env//
+dotenv.config();
 
 const router = Router();
-const clientId = 'w0um6maunawdgio';
-const clientSecret = 'sd2xpbjyvme35ur';
+
+const clientId = process.env.CLIENT_ID !== undefined ? process.env.CLIENT_ID : '';
+const clientSecret = process.env.CLIENT_SECRET !== undefined ? process.env.CLIENT_SECRET : '';
+
 const redirectUri = 'http://localhost:3000/auth/dropbox/callback';
 
 const dropboxService = new DropboxService(clientId, clientSecret, redirectUri);

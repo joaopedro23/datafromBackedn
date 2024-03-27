@@ -4,3 +4,4 @@ const authconfig = {
     JWT_KEY: 'NASNAMKDJOLD'
 };
 exports.default = authconfig;
+// coloca como env. secret_key
